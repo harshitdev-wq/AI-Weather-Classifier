@@ -1,33 +1,144 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="AI Weather Classifier — ResNet18 image classification for fog, rain and snow.">
-  <title>AI Weather Classifier</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroVision • AI Weather Classification</title>
+  <meta name="description" content="Automated meteorological scene classification system powered by fine-tuned ResNet-18 for Fog, Rain, and Snow condition recognition.">
+  <meta property="og:title" content="AeroVision • AI Weather Classification">
+  <meta property="og:description" content="Automated meteorological scene classification powered by fine-tuned ResNet-18.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header"><div class="shell nav">
-    <a class="brand" href="#"><span class="brand-mark">☁</span><span>AI Weather Classifier</span></a>
-    <div class="nav-meta"><span class="status"><span id="statusDot" class="status-dot"></span><span id="statusText">Checking backend…</span></span><button id="configEndpointBtn" class="ghost-btn" type="button">API settings</button></div>
-  </div></header>
-  <main class="shell">
-    <section class="hero"><p class="eyebrow">Computer vision · ResNet18</p><h1>Classify weather from a single image.</h1><p class="hero-copy">Upload a scene and the FastAPI service will classify it as fog, rain, or snow.</p>
-      <div class="stats"><div><strong>93.29%</strong><span>validation accuracy</span></div><div><strong>3</strong><span>weather classes</span></div><div><strong>224×224</strong><span>model input</span></div></div>
+
+  <div class="app-container">
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          </svg>
+        </div>
+        <div><span class="brand-title">AeroVision CV</span></div>
+        <span class="brand-badge">ResNet-18</span>
+      </div>
+      <div class="nav-actions">
+        <div class="status-indicator" id="apiStatusDisplay" title="API Status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">API Ready</span>
+        </div>
+        <button type="button" class="settings-btn" id="configEndpointBtn" title="Configure Backend Endpoint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 1-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>API Config</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m9 12 2 2 4-4"></path>
+        </svg>
+        <span>Computer Vision Pipeline</span>
+      </div>
+      <h1>Automated Weather Scene Classification</h1>
+      <p class="hero-subtitle">Upload an image to classify its weather condition using a fine-tuned ResNet-18 model.</p>
     </section>
-    <section class="workspace" aria-label="Weather classification workspace">
-      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Choose a weather image"><div class="upload-icon">↑</div><h2>Drop an image here</h2><p>or choose a JPG, PNG, or WEBP file</p><button id="browseButton" class="primary-btn" type="button">Choose image</button><input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><small>Maximum 15 MB</small></div>
-      <div id="previewContainer" class="preview" hidden><div class="preview-media"><img id="previewImage" alt="Selected weather scene"></div><div class="file-row"><div><strong id="fileInfo">image.jpg</strong><span id="fileMetaSub">Ready for classification</span></div><div class="row-actions"><button id="changeImageBtn" class="text-btn" type="button">Change</button><button id="removeButton" class="text-btn danger" type="button">Remove</button></div></div></div>
-      <button id="predictButton" class="analyze-btn" type="button" disabled>Analyze weather</button>
-      <div id="loading" class="loading" hidden><span class="spinner"></span><span>Running ResNet18 inference…</span></div>
-      <section id="result" class="result" hidden aria-live="polite"><div class="result-top"><div><span class="result-kicker">Prediction</span><h2 id="prediction">—</h2></div><div id="confidenceTier" class="confidence-pill">—</div></div><div class="confidence-head"><span>Model confidence</span><strong id="confidence">0.00%</strong></div><div class="meter"><div id="confidenceFill"></div></div><p class="note"><strong>Confidence is not accuracy.</strong> This percentage is the model's softmax output for this image; it is not a guarantee of correctness.</p><div class="result-grid"><div><span>Inference device</span><strong id="deviceInfo">—</strong></div><div><span>Validation accuracy</span><strong>93.29%</strong></div><div><span>Classes</span><strong>Fog · Rain · Snow</strong></div></div><button id="analyzeAnotherBtn" class="secondary-btn" type="button">Analyze another image</button></section>
-      <div id="error" class="error" hidden role="alert"><strong id="errorHeading">Inference failed</strong><p id="errorMessage"></p><small id="errorSuggestion"></small></div>
+
+    <main class="workspace">
+      <div class="workspace-card">
+        <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload a weather image">
+          <div class="drop-icon" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 20h14"></path>
+            </svg>
+          </div>
+          <h2>Drop an image here</h2>
+          <p>or browse from your device</p>
+          <button id="browseButton" type="button" class="primary-btn">Choose Image</button>
+          <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <span class="upload-limit">JPG, PNG, WEBP • Max 15 MB</span>
+        </div>
+
+        <div id="previewContainer" class="preview-container" hidden>
+          <div class="preview-media"><img id="previewImage" alt="Selected weather image"></div>
+          <div class="preview-meta">
+            <div>
+              <div id="fileInfo" class="file-name">image.jpg</div>
+              <div id="fileMetaSub" class="file-sub">Ready for classification</div>
+            </div>
+            <div class="preview-actions">
+              <button id="changeImageBtn" type="button" class="text-btn">Change</button>
+              <button id="removeButton" type="button" class="text-btn danger">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="predictButton" type="button" class="analyze-btn" disabled>Analyze Weather</button>
+        <div id="loading" class="loading-state" hidden>
+          <span class="spinner"></span><span>Running ResNet-18 inference…</span>
+        </div>
+
+        <section id="result" class="result-panel" hidden aria-live="polite">
+          <div class="result-header">
+            <div class="result-title-wrap">
+              <div class="result-kicker">Predicted condition</div>
+              <div class="prediction-row">
+                <div id="weatherIconContainer" class="weather-icon" aria-hidden="true"></div>
+                <h2 id="prediction">—</h2>
+              </div>
+            </div>
+            <div id="confidenceTier" class="confidence-tier-pill">—</div>
+          </div>
+
+          <div class="confidence-block">
+            <div class="confidence-head"><span>Model confidence</span><strong id="confidence">0.00%</strong></div>
+            <div class="confidence-meter"><div id="confidenceFill"></div></div>
+            <p class="confidence-note"><strong>This is not accuracy.</strong> It is the model's softmax output for this image.</p>
+          </div>
+
+          <div class="result-metrics">
+            <div class="metric"><span>Inference device</span><strong id="deviceInfo">—</strong></div>
+            <div class="metric"><span>Validation accuracy</span><strong>93.29%</strong></div>
+            <div class="metric"><span>Model input</span><strong>224 × 224</strong></div>
+          </div>
+
+          <button id="analyzeAnotherBtn" type="button" class="secondary-btn">Analyze Another Image</button>
+        </section>
+
+        <div id="error" class="error-panel" hidden role="alert">
+          <div id="errorHeading" class="error-title">Inference Error</div>
+          <div id="errorMessage" class="error-message"></div>
+          <div id="errorSuggestion" class="error-suggestion"></div>
+        </div>
+      </div>
+    </main>
+
+    <section class="method-section">
+      <div>
+        <div class="section-label">System overview</div>
+        <h2>From pixels to a weather label.</h2>
+      </div>
+      <p>The browser uploads the image to FastAPI, where it is resized and normalized before ResNet-18 inference. The API returns the predicted class, confidence, probabilities, and runtime device.</p>
     </section>
-    <section class="method"><div><span class="section-label">How it works</span><h2>From pixels to a weather label.</h2></div><p>The browser sends the original image to FastAPI. The service resizes and normalizes it, runs ResNet18, applies softmax, and returns the predicted class and probabilities.</p></section>
-  </main>
-  <footer class="shell footer"><span>AI Weather Classifier</span><span>PyTorch · FastAPI · CUDA-ready locally</span></footer>
-  <div id="configModal" class="modal" hidden><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="configTitle"><div class="modal-head"><h2 id="configTitle">API settings</h2><button id="closeModalBtn" class="icon-btn" type="button" aria-label="Close">×</button></div><label for="apiUrlInput">Prediction endpoint</label><input id="apiUrlInput" type="url" spellcheck="false" placeholder="/api/predict"><p>Production default: <code>/api/predict</code></p><div class="modal-actions"><button id="cancelConfigBtn" class="secondary-btn" type="button">Cancel</button><button id="saveConfigBtn" class="primary-btn" type="button">Save</button></div></div></div>
+
+    <footer class="footer"><span>AeroVision CV</span><span>PyTorch · FastAPI · ResNet-18</span></footer>
+  </div>
+
+  <div id="configModal" class="modal" hidden>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="configTitle">
+      <div class="modal-header"><h2 id="configTitle">API Configuration</h2><button id="closeModalBtn" class="close-btn" type="button" aria-label="Close">×</button></div>
+      <label for="apiUrlInput">Prediction endpoint</label>
+      <input id="apiUrlInput" type="url" spellcheck="false" placeholder="/api/predict">
+      <p class="modal-help">Production default: <code>/api/predict</code></p>
+      <div class="modal-actions"><button id="cancelConfigBtn" type="button" class="secondary-btn">Cancel</button><button id="saveConfigBtn" type="button" class="primary-btn">Save</button></div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
