@@ -2,7 +2,7 @@
 
 The trained ResNet18 checkpoint is intentionally not committed to this repository.
 
-After training, the expected path is:
+The API expects:
 
 ```text
 models/weather_resnet18.pth
@@ -14,4 +14,18 @@ Generate it with:
 python train.py
 ```
 
-Keeping the binary checkpoint and raw dataset out of Git makes the source repository lightweight and reviewable.
+## Local inference
+
+After training, start the API with:
+
+```bash
+python -m uvicorn backend.main:app --reload
+```
+
+## Vercel deployment
+
+The Vercel function is designed to **build without the checkpoint**. The `/health` endpoint reports `degraded` until the checkpoint is available, and `/predict` returns HTTP 503 rather than crashing the deployment.
+
+For a fully working hosted inference service, the checkpoint must be supplied to the deployed runtime. Do not place the dataset in the repository. For production hosting, a smaller ONNX checkpoint plus `onnxruntime` is recommended if the PyTorch dependency bundle exceeds the platform's function-size limit.
+
+Keeping raw image data and large binary artifacts out of Git keeps the source repository lightweight and reviewable.
