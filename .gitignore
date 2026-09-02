@@ -1,17 +1,35 @@
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
 .venv/
 venv/
+env/
+
+# Environment / secrets
 .env
 .env.*
 !.env.example
-.DS_Store
-Thumbs.db
+
+# Local tooling
 .vscode/
 .idea/
+.vercel/
+.DS_Store
+Thumbs.db
 *.log
+
+# Datasets and generated binaries
 /data/
 /models/*.pth
 /models/*.pt
 /models/*.onnx
+
+# Generated reports / predictions
 /reports/weather_predictions.csv
+
+# Frontend build artifacts
+node_modules/
+dist/
+build/
+coverage/
