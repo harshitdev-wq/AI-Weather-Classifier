@@ -1,6 +1,10 @@
-fastapi
-uvicorn
-python-multipart
-Pillow
-torch
-torchvision
+# FastAPI backend
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+python-multipart>=0.0.9,<1
+Pillow>=10,<12
+
+# Deep learning
+# Install the PyTorch build appropriate for your CUDA environment.
+torch>=2.6,<3
+torchvision>=0.21,<1
