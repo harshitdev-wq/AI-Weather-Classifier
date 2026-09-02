@@ -35,7 +35,7 @@
         <button type="button" class="settings-btn" id="configEndpointBtn" title="Configure Backend Endpoint">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 .33-1.82V9A1.65 1.65 0 0 0 3.09 10H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 5a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9A1.65 1.65 0 0 0 10 1.09V1a2 2 0 0 1 2-1 2 2 0 0 1 2 2v.09A1.65 1.65 0 0 0 15 3a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 5c.12.6.65 1 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09A1.65 1.65 0 0 0 19.4 11c-.12.6-.65 1-1.51 1Z"></path>
           </svg>
           <span>API Config</span>
         </button>
@@ -71,10 +71,7 @@
           <div class="preview-media"><img id="previewImage" alt="Selected weather scene"></div>
           <div class="file-row">
             <div><strong id="fileInfo">image.jpg</strong><span id="fileMetaSub">Ready for classification</span></div>
-            <div class="row-actions">
-              <button id="changeImageBtn" class="text-btn" type="button">Change</button>
-              <button id="removeButton" class="text-btn danger" type="button">Remove</button>
-            </div>
+            <div class="row-actions"><button id="changeImageBtn" class="text-btn" type="button">Change</button><button id="removeButton" class="text-btn danger" type="button">Remove</button></div>
           </div>
         </div>
 
@@ -83,10 +80,7 @@
 
         <section id="result" class="result" hidden aria-live="polite">
           <div class="result-top">
-            <div>
-              <span class="result-kicker">Prediction</span>
-              <div class="prediction-with-icon"><div id="weatherIconContainer" class="weather-icon" aria-hidden="true"></div><h2 id="prediction">—</h2></div>
-            </div>
+            <div><span class="result-kicker">Prediction</span><div class="prediction-with-icon"><div id="weatherIconContainer" class="weather-icon" aria-hidden="true"></div><h2 id="prediction">—</h2></div></div>
             <div id="confidenceTier" class="confidence-tier-pill">—</div>
           </div>
           <div class="confidence-head"><span>Model confidence</span><strong id="confidence">0.00%</strong></div>
@@ -100,19 +94,11 @@
           <button id="analyzeAnotherBtn" class="secondary-btn" type="button">Analyze another image</button>
         </section>
 
-        <div id="error" class="error" hidden role="alert">
-          <strong id="errorHeading">Inference failed</strong>
-          <p id="errorMessage"></p>
-          <small id="errorSuggestion"></small>
-        </div>
+        <div id="error" class="error" hidden role="alert"><strong id="errorHeading">Inference failed</strong><p id="errorMessage"></p><small id="errorSuggestion"></small></div>
       </div>
     </main>
 
-    <section class="method">
-      <div><span class="section-label">How it works</span><h2>From pixels to a weather label.</h2></div>
-      <p>The browser sends the original image to FastAPI. The service resizes and normalizes it, runs ResNet-18, applies softmax, and returns the predicted class and probabilities.</p>
-    </section>
-
+    <section class="method"><div><span class="section-label">How it works</span><h2>From pixels to a weather label.</h2></div><p>The browser sends the original image to FastAPI. The service resizes and normalizes it, runs ResNet-18, applies softmax, and returns the predicted class and probabilities.</p></section>
     <footer class="footer"><span>AeroVision CV</span><span>PyTorch · FastAPI · ResNet-18</span></footer>
   </div>
 
