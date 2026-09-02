@@ -13,7 +13,7 @@
     <div class="nav-meta"><span class="status"><span id="statusDot" class="status-dot"></span><span id="statusText">Checking backend…</span></span><button id="configEndpointBtn" class="ghost-btn" type="button">API settings</button></div>
   </div></header>
   <main class="shell">
-    <section class="hero"><p class="eyebrow">Computer vision · ResNet18</p><h1>Classify weather from a single image.</h1><p class="hero-copy">Upload a scene and the local FastAPI service will classify it as fog, rain, or snow.</p>
+    <section class="hero"><p class="eyebrow">Computer vision · ResNet18</p><h1>Classify weather from a single image.</h1><p class="hero-copy">Upload a scene and the FastAPI service will classify it as fog, rain, or snow.</p>
       <div class="stats"><div><strong>93.29%</strong><span>validation accuracy</span></div><div><strong>3</strong><span>weather classes</span></div><div><strong>224×224</strong><span>model input</span></div></div>
     </section>
     <section class="workspace" aria-label="Weather classification workspace">
@@ -26,8 +26,8 @@
     </section>
     <section class="method"><div><span class="section-label">How it works</span><h2>From pixels to a weather label.</h2></div><p>The browser sends the original image to FastAPI. The service resizes and normalizes it, runs ResNet18, applies softmax, and returns the predicted class and probabilities.</p></section>
   </main>
-  <footer class="shell footer"><span>AI Weather Classifier</span><span>PyTorch · FastAPI · CUDA-ready</span></footer>
-  <div id="configModal" class="modal" hidden><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="configTitle"><div class="modal-head"><h2 id="configTitle">API settings</h2><button id="closeModalBtn" class="icon-btn" type="button" aria-label="Close">×</button></div><label for="apiUrlInput">Prediction endpoint</label><input id="apiUrlInput" type="url" spellcheck="false" placeholder="http://127.0.0.1:8000/predict"><p>Default: <code>http://127.0.0.1:8000/predict</code></p><div class="modal-actions"><button id="cancelConfigBtn" class="secondary-btn" type="button">Cancel</button><button id="saveConfigBtn" class="primary-btn" type="button">Save</button></div></div></div>
+  <footer class="shell footer"><span>AI Weather Classifier</span><span>PyTorch · FastAPI · CUDA-ready locally</span></footer>
+  <div id="configModal" class="modal" hidden><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="configTitle"><div class="modal-head"><h2 id="configTitle">API settings</h2><button id="closeModalBtn" class="icon-btn" type="button" aria-label="Close">×</button></div><label for="apiUrlInput">Prediction endpoint</label><input id="apiUrlInput" type="url" spellcheck="false" placeholder="/api/predict"><p>Production default: <code>/api/predict</code></p><div class="modal-actions"><button id="cancelConfigBtn" class="secondary-btn" type="button">Cancel</button><button id="saveConfigBtn" class="primary-btn" type="button">Save</button></div></div></div>
   <script src="script.js"></script>
 </body>
 </html>
