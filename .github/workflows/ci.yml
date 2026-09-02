@@ -10,7 +10,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Check Python syntax
-        run: python -m compileall -q train.py evaluate.py predict.py backend
+        run: python -m compileall -q train.py evaluate.py predict.py api backend
+
       - name: Check frontend JavaScript syntax
         run: node --check frontend/script.js
+
+      - name: Validate Vercel configuration
+        run: python -m json.tool vercel.json > /dev/null
