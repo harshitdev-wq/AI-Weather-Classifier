@@ -20,7 +20,7 @@ A computer-vision application that classifies weather scenes into **fog**, **rai
 ```mermaid
 flowchart LR
     A[Weather Image] --> B[Browser UI]
-    B -->|multipart/form-data| C[FastAPI /predict]
+    B -->|multipart/form-data| C[FastAPI /api/predict]
     C --> D[Resize + ImageNet Normalize]
     D --> E[ResNet18]
     E --> F[Softmax]
@@ -31,8 +31,10 @@ flowchart LR
 
 ```text
 AI-Weather-Classifier/
+├── api/
+│   └── index.py           # Vercel FastAPI entrypoint
 ├── backend/
-│   └── main.py
+│   └── main.py            # FastAPI application
 ├── frontend/
 │   ├── index.html
 │   ├── script.js
@@ -45,6 +47,9 @@ AI-Weather-Classifier/
 ├── evaluate.py
 ├── predict.py
 ├── requirements.txt
+├── pyproject.toml
+├── vercel.json
+├── .python-version
 ├── .gitignore
 └── README.md
 ```
@@ -52,8 +57,6 @@ AI-Weather-Classifier/
 ## Local setup
 
 ### 1. Install Python dependencies
-
-A recent Python installation is recommended. For GPU acceleration, install the PyTorch build appropriate for your NVIDIA/CUDA environment before starting the API.
 
 ```bash
 python -m pip install -r requirements.txt
@@ -75,8 +78,6 @@ The unlabeled external test images can be placed at:
 data/3_3_test_fin/test/
 ```
 
-The dataset is ignored by Git because raw image collections do not belong in the source repository.
-
 ### 3. Train the model
 
 ```bash
@@ -95,31 +96,19 @@ This recreates the same 80/20 split (seed `42`) and writes `reports/evaluation_r
 
 ### 5. Run a prediction
 
-Single image:
-
 ```bash
 python predict.py "data/3_3_test_fin/test/0.png"
 ```
 
-All unlabeled test images:
-
-```bash
-python predict.py
-```
-
-The batch predictions are written to `reports/weather_predictions.csv`.
-
-### 6. Start the API
+### 6. Start the API locally
 
 ```bash
 python -m uvicorn backend.main:app --reload
 ```
 
-Open the interactive API documentation at `http://127.0.0.1:8000/docs`.
+Open `http://127.0.0.1:8000/docs`.
 
-### 7. Serve the frontend
-
-From the repository root:
+### 7. Serve the frontend locally
 
 ```bash
 python -m http.server 5500
@@ -131,17 +120,31 @@ Then open:
 http://127.0.0.1:5500/frontend/index.html
 ```
 
-The frontend sends uploaded images to `POST /predict` and does not generate fake predictions when the backend is unavailable.
+The standalone local frontend uses `http://127.0.0.1:8000/predict` by default. The deployed Vercel frontend automatically uses `/api/predict` on the same origin.
+
+## Vercel deployment
+
+The repository contains a Vercel-compatible entrypoint at `api/index.py` and routing in `vercel.json`. Vercel's Python runtime supports FastAPI and uses `api/index.py` as the function entrypoint. citeturn425471search1turn425471search3
+
+The Python runtime is pinned to 3.12 because Vercel currently supports 3.12, 3.13, and 3.14, with 3.12 as the documented default. citeturn425471search0turn425471search1
+
+The frontend is rewritten from `/` to `frontend/index.html`, with its CSS and JavaScript served from the corresponding `frontend/` files. The browser calls `/api/predict`, so production does not depend on a user's localhost machine.
+
+### Model requirement
+
+The trained checkpoint is **not committed** to Git. Without `models/weather_resnet18.pth`, the deployment can still boot, but the API reports `model_loaded: false` and prediction requests return HTTP 503 instead of crashing the whole deployment. For actual hosted inference, the checkpoint must be supplied to the deployed runtime.
+
+Because PyTorch is a large dependency, a Vercel function can also run into its Python bundle-size limit. Vercel documents techniques for controlling what gets bundled, and its Python runtime documentation notes a 500 MB bundle limit. citeturn425471search1 A production-friendly next step is to export the trained ResNet18 checkpoint to ONNX and serve it with `onnxruntime`, which is substantially lighter than shipping the full PyTorch stack.
 
 ## API
 
-### `GET /health`
+### `GET /api/health`
 
-Returns backend status and the selected device.
+Returns deployment/device/model status.
 
-### `POST /predict`
+### `POST /api/predict`
 
-Multipart field: `file`
+Multipart field: `file`.
 
 Example response:
 
@@ -155,17 +158,13 @@ Example response:
     "snow": 0.03
   },
   "validation_accuracy": 93.29,
-  "device": "cuda"
+  "device": "cpu"
 }
 ```
 
 ## Notes on confidence
 
 The displayed confidence is the model's softmax output for one image. It is **not** the same thing as accuracy, and it should not be interpreted as a guarantee that the prediction is correct.
-
-## Why the repository excludes the dataset and checkpoint
-
-The repository is designed to keep source code lightweight and reviewable. Raw image data and trained binary checkpoints are ignored by Git. Anyone reproducing the project can train the checkpoint locally using the included `train.py` script.
 
 ## License
 
