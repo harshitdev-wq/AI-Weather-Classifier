@@ -1,5 +1,8 @@
 const API_URL_STORAGE_KEY = "weather_api_url";
-let API_URL = localStorage.getItem(API_URL_STORAGE_KEY) || "http://127.0.0.1:8000/predict";
+const DEFAULT_API_URL = window.location.protocol === "http:" || window.location.protocol === "https:"
+  ? "/api/predict"
+  : "http://127.0.0.1:8000/predict";
+let API_URL = localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL;
 
 const $ = (id) => document.getElementById(id);
 const dropZone = $("dropZone");
@@ -44,9 +47,12 @@ function setStatus(text, connected = false) {
 
 async function checkBackendHealth() {
   try {
-    const baseUrl = new URL(API_URL).origin;
-    const response = await fetch(`${baseUrl}/health`, { signal: AbortSignal.timeout(1800) });
-    if (!response.ok) throw new Error();
+    const healthUrl = API_URL.startsWith("/")
+      ? "/api/health"
+      : `${new URL(API_URL).origin}/health`;
+    const response = await fetch(healthUrl, { signal: AbortSignal.timeout(2500) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.status === "degraded") throw new Error(data.model_error || "Backend is degraded");
     setStatus("Backend Connected", true);
   } catch {
     setStatus("Backend Offline");
@@ -116,7 +122,7 @@ async function predictWeather() {
     const response = await fetch(API_URL, {
       method: "POST",
       body: formData,
-      signal: AbortSignal.timeout(15000)
+      signal: AbortSignal.timeout(30000)
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.detail || `Server returned HTTP ${response.status}`);
@@ -124,19 +130,19 @@ async function predictWeather() {
     const safeScore = Math.max(0, Math.min(100, score));
     prediction.textContent = String(data.prediction || "UNKNOWN").toUpperCase();
     confidence.textContent = `${safeScore.toFixed(2)}%`;
-    confidenceNoteVal.textContent = `${safeScore.toFixed(2)}%`;
+    if (confidenceNoteVal) confidenceNoteVal.textContent = `${safeScore.toFixed(2)}%`;
     confidenceFill.style.width = `${safeScore}%`;
     confidenceTier.textContent = safeScore >= 90 ? "High Confidence" : safeScore >= 70 ? "Moderate Confidence" : "Low Confidence";
     deviceInfo.textContent = data.device ? String(data.device).toUpperCase() : "UNKNOWN";
     result.hidden = false;
     setStatus("Backend Connected", true);
   } catch (error) {
-    setStatus("Backend Offline");
     showError(
       "Inference failed",
-      error.name === "TimeoutError" ? "The backend took too long to respond." : `Unable to reach the prediction API. ${error.message}`,
-      "Start the service with: python -m uvicorn backend.main:app --reload"
+      error.name === "TimeoutError" ? "The prediction service took too long to respond." : `Unable to reach the prediction API. ${error.message}`,
+      API_URL.startsWith("/") ? "Check the deployment logs and make sure the model checkpoint is available." : "Start the service with: python -m uvicorn backend.main:app --reload"
     );
+    setStatus("Backend Offline");
   } finally {
     loading.hidden = true;
     predictButton.disabled = false;
@@ -162,7 +168,7 @@ cancelConfigBtn.addEventListener("click", closeConfig);
 configModal.addEventListener("click", (event) => { if (event.target === configModal) closeConfig(); });
 saveConfigBtn.addEventListener("click", () => {
   const nextUrl = apiUrlInput.value.trim();
-  try { new URL(nextUrl); } catch { showError("Invalid API URL", "Enter a complete endpoint URL.", "Example: http://127.0.0.1:8000/predict"); return; }
+  try { new URL(nextUrl, window.location.origin); } catch { showError("Invalid API URL", "Enter a valid endpoint URL.", "For the deployed app, use /api/predict"); return; }
   API_URL = nextUrl;
   localStorage.setItem(API_URL_STORAGE_KEY, API_URL);
   closeConfig();
