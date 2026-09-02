@@ -1,8 +1,16 @@
 # AI Weather Classifier
 
-A computer-vision application that classifies weather scenes into **fog**, **rain**, and **snow** using a pretrained **ResNet18** model with transfer learning. The project includes a browser interface, a FastAPI inference service, reproducible training/evaluation scripts, and GPU-aware inference.
+A computer-vision application that classifies weather scenes into **fog**, **rain**, and **snow** using a pretrained **ResNet18** model with transfer learning.
 
-## Results
+## Deployment architecture
+
+```text
+Browser → Vercel (static frontend) → FastAPI backend → ResNet18
+```
+
+Vercel's standard Python Functions have a 500 MB function bundle limit. The PyTorch/Torchvision dependency tree for this project is much larger, so packaging the inference service directly as a Vercel Python Function produces a multi-gigabyte bundle and fails before deployment. citeturn790776search2
+
+### Results
 
 | Metric | Result |
 |---|---:|
@@ -11,30 +19,15 @@ A computer-vision application that classifies weather scenes into **fog**, **rai
 | Correct predictions | 389 |
 | Classes | Fog / Rain / Snow |
 | Input size | 224 × 224 RGB |
-| Inference | PyTorch + FastAPI |
 
-> **Important:** 93.29% is the measured accuracy on the held-out validation split. The external test images in `data/3_3_test_fin/test` are unlabeled, so this project does **not** claim test-set accuracy.
+> **Important:** 93.29% is measured on the held-out validation split. The external test images are unlabeled, so no test-set accuracy is claimed.
 
-## Architecture
-
-```mermaid
-flowchart LR
-    A[Weather Image] --> B[Browser UI]
-    B -->|multipart/form-data| C[FastAPI /api/predict]
-    C --> D[Resize + ImageNet Normalize]
-    D --> E[ResNet18]
-    E --> F[Softmax]
-    F --> G[Fog / Rain / Snow]
-```
-
-## Project structure
+## Repository structure
 
 ```text
 AI-Weather-Classifier/
-├── api/
-│   └── index.py           # Vercel FastAPI entrypoint
 ├── backend/
-│   └── main.py            # FastAPI application
+│   └── main.py             # FastAPI inference service
 ├── frontend/
 │   ├── index.html
 │   ├── script.js
@@ -42,29 +35,23 @@ AI-Weather-Classifier/
 ├── models/
 │   └── README.md
 ├── reports/
-├── data/                  # local dataset; ignored by Git
+├── data/                   # local dataset; ignored by Git
 ├── train.py
 ├── evaluate.py
 ├── predict.py
 ├── requirements.txt
-├── pyproject.toml
-├── vercel.json
-├── .python-version
-├── .gitignore
 └── README.md
 ```
 
 ## Local setup
 
-### 1. Install Python dependencies
+Install dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 2. Add the dataset
-
-Place the labelled training data at:
+Place the labelled dataset at:
 
 ```text
 data/3_3_train/train/fog/
@@ -72,100 +59,66 @@ data/3_3_train/train/rain/
 data/3_3_train/train/snow/
 ```
 
-The unlabeled external test images can be placed at:
-
-```text
-data/3_3_test_fin/test/
-```
-
-### 3. Train the model
+Train:
 
 ```bash
 python train.py
 ```
 
-The best checkpoint is written to `models/weather_resnet18.pth`.
-
-### 4. Evaluate the validation split
+Evaluate:
 
 ```bash
 python evaluate.py
 ```
 
-This recreates the same 80/20 split (seed `42`) and writes `reports/evaluation_report.txt`.
-
-### 5. Run a prediction
-
-```bash
-python predict.py "data/3_3_test_fin/test/0.png"
-```
-
-### 6. Start the API locally
+Run the API:
 
 ```bash
 python -m uvicorn backend.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/docs`.
-
-### 7. Serve the frontend locally
+Serve the frontend:
 
 ```bash
 python -m http.server 5500
 ```
 
-Then open:
+Open `http://127.0.0.1:5500/frontend/index.html`.
 
-```text
-http://127.0.0.1:5500/frontend/index.html
+## Production deployment
+
+### Frontend — Vercel
+
+Deploy this repository as a **static site**. The Vercel deployment should not package the Python backend or PyTorch dependencies. The root rewrite points `/` to `frontend/index.html`.
+
+### Backend — Python service
+
+Deploy `backend/main.py` to a Python service that supports the PyTorch dependency tree. Use:
+
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port $PORT
 ```
 
-The standalone local frontend uses `http://127.0.0.1:8000/predict` by default. The deployed Vercel frontend automatically uses `/api/predict` on the same origin.
-
-## Vercel deployment
-
-The repository contains a Vercel-compatible entrypoint at `api/index.py` and routing in `vercel.json`. Vercel's Python runtime supports FastAPI and uses `api/index.py` as the function entrypoint. citeturn425471search1turn425471search3
-
-The Python runtime is pinned to 3.12 because Vercel currently supports 3.12, 3.13, and 3.14, with 3.12 as the documented default. citeturn425471search0turn425471search1
-
-The frontend is rewritten from `/` to `frontend/index.html`, with its CSS and JavaScript served from the corresponding `frontend/` files. The browser calls `/api/predict`, so production does not depend on a user's localhost machine.
-
-### Model requirement
-
-The trained checkpoint is **not committed** to Git. Without `models/weather_resnet18.pth`, the deployment can still boot, but the API reports `model_loaded: false` and prediction requests return HTTP 503 instead of crashing the whole deployment. For actual hosted inference, the checkpoint must be supplied to the deployed runtime.
-
-Because PyTorch is a large dependency, a Vercel function can also run into its Python bundle-size limit. Vercel documents techniques for controlling what gets bundled, and its Python runtime documentation notes a 500 MB bundle limit. citeturn425471search1 A production-friendly next step is to export the trained ResNet18 checkpoint to ONNX and serve it with `onnxruntime`, which is substantially lighter than shipping the full PyTorch stack.
+The backend must have `models/weather_resnet18.pth` available. After the backend is public, enter its `/predict` URL in the frontend's **API settings** dialog.
 
 ## API
 
-### `GET /api/health`
+`GET /health` returns backend and model status.
 
-Returns deployment/device/model status.
+`POST /predict` accepts a multipart image field named `file` and returns the prediction, confidence, class probabilities, validation accuracy, and inference device.
 
-### `POST /api/predict`
+## Model
 
-Multipart field: `file`.
+The trained checkpoint is intentionally excluded from Git. After training, place it at:
 
-Example response:
-
-```json
-{
-  "prediction": "rain",
-  "confidence": 99.96,
-  "probabilities": {
-    "fog": 0.01,
-    "rain": 99.96,
-    "snow": 0.03
-  },
-  "validation_accuracy": 93.29,
-  "device": "cpu"
-}
+```text
+models/weather_resnet18.pth
 ```
 
-## Notes on confidence
+## Confidence
 
-The displayed confidence is the model's softmax output for one image. It is **not** the same thing as accuracy, and it should not be interpreted as a guarantee that the prediction is correct.
+The confidence shown by the UI is the model's softmax output for the selected image. It is not a guarantee of correctness and should not be confused with the 93.29% validation accuracy.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT.
