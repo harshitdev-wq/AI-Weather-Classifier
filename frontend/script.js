@@ -1,8 +1,9 @@
 const API_URL_STORAGE_KEY = "weather_api_url";
-const DEFAULT_API_URL = window.location.protocol === "http:" || window.location.protocol === "https:"
-  ? "/api/predict"
-  : "http://127.0.0.1:8000/predict";
-let API_URL = localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL;
+const isStandaloneLocal = window.location.protocol === "file:" || window.location.port === "5500";
+const DEFAULT_API_URL = isStandaloneLocal ? "http://127.0.0.1:8000/predict" : "/api/predict";
+let API_URL = isStandaloneLocal
+  ? (localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL)
+  : DEFAULT_API_URL;
 
 const $ = (id) => document.getElementById(id);
 const dropZone = $("dropZone");
@@ -170,7 +171,7 @@ saveConfigBtn.addEventListener("click", () => {
   const nextUrl = apiUrlInput.value.trim();
   try { new URL(nextUrl, window.location.origin); } catch { showError("Invalid API URL", "Enter a valid endpoint URL.", "For the deployed app, use /api/predict"); return; }
   API_URL = nextUrl;
-  localStorage.setItem(API_URL_STORAGE_KEY, API_URL);
+  if (isStandaloneLocal) localStorage.setItem(API_URL_STORAGE_KEY, API_URL);
   closeConfig();
   checkBackendHealth();
 });
