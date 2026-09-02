@@ -56,55 +56,57 @@
     </section>
 
     <!-- Main Workspace -->
-    <section class="workspace-card">
-      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload a weather image">
-        <div class="upload-icon" aria-hidden="true">↑</div>
-        <h2>Drop an image here</h2>
-        <p>or choose a JPG, PNG, or WEBP file</p>
-        <button id="browseButton" class="primary-btn" type="button">Choose Image</button>
-        <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
-        <small>Maximum 15 MB</small>
-      </div>
+    <main class="workspace">
+      <div class="workspace-card">
+        <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload a weather image">
+          <div class="upload-icon" aria-hidden="true">↑</div>
+          <h2>Drop an image here</h2>
+          <p>or choose a JPG, PNG, or WEBP file</p>
+          <button id="browseButton" class="primary-btn" type="button">Choose Image</button>
+          <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <small>Maximum 15 MB</small>
+        </div>
 
-      <div id="previewContainer" class="preview-container" hidden>
-        <div class="preview-media"><img id="previewImage" alt="Selected weather scene"></div>
-        <div class="file-row">
-          <div><strong id="fileInfo">image.jpg</strong><span id="fileMetaSub">Ready for classification</span></div>
-          <div class="row-actions">
-            <button id="changeImageBtn" class="text-btn" type="button">Change</button>
-            <button id="removeButton" class="text-btn danger" type="button">Remove</button>
+        <div id="previewContainer" class="preview-container" hidden>
+          <div class="preview-media"><img id="previewImage" alt="Selected weather scene"></div>
+          <div class="file-row">
+            <div><strong id="fileInfo">image.jpg</strong><span id="fileMetaSub">Ready for classification</span></div>
+            <div class="row-actions">
+              <button id="changeImageBtn" class="text-btn" type="button">Change</button>
+              <button id="removeButton" class="text-btn danger" type="button">Remove</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <button id="predictButton" class="analyze-btn" type="button" disabled>Analyze Weather</button>
-      <div id="loading" class="loading" hidden><span class="spinner"></span><span>Running ResNet-18 inference…</span></div>
+        <button id="predictButton" class="analyze-btn" type="button" disabled>Analyze Weather</button>
+        <div id="loading" class="loading" hidden><span class="spinner"></span><span>Running ResNet-18 inference…</span></div>
 
-      <section id="result" class="result" hidden aria-live="polite">
-        <div class="result-top">
-          <div>
-            <span class="result-kicker">Prediction</span>
-            <div class="prediction-with-icon"><div id="weatherIconContainer" class="weather-icon" aria-hidden="true"></div><h2 id="prediction">—</h2></div>
+        <section id="result" class="result" hidden aria-live="polite">
+          <div class="result-top">
+            <div>
+              <span class="result-kicker">Prediction</span>
+              <div class="prediction-with-icon"><div id="weatherIconContainer" class="weather-icon" aria-hidden="true"></div><h2 id="prediction">—</h2></div>
+            </div>
+            <div id="confidenceTier" class="confidence-tier-pill">—</div>
           </div>
-          <div id="confidenceTier" class="confidence-tier-pill">—</div>
-        </div>
-        <div class="confidence-head"><span>Model confidence</span><strong id="confidence">0.00%</strong></div>
-        <div class="meter"><div id="confidenceFill"></div></div>
-        <p class="note"><strong>Confidence is not accuracy.</strong> This percentage is the model's softmax output for this image; it is not a guarantee of correctness.</p>
-        <div class="result-grid">
-          <div><span>Inference device</span><strong id="deviceInfo">—</strong></div>
-          <div><span>Validation accuracy</span><strong>93.29%</strong></div>
-          <div><span>Input size</span><strong>224 × 224</strong></div>
-        </div>
-        <button id="analyzeAnotherBtn" class="secondary-btn" type="button">Analyze another image</button>
-      </section>
+          <div class="confidence-head"><span>Model confidence</span><strong id="confidence">0.00%</strong></div>
+          <div class="meter"><div id="confidenceFill"></div></div>
+          <p class="note"><strong>Confidence is not accuracy.</strong> This percentage is the model's softmax output for this image; it is not a guarantee of correctness.</p>
+          <div class="result-grid">
+            <div><span>Inference device</span><strong id="deviceInfo">—</strong></div>
+            <div><span>Validation accuracy</span><strong>93.29%</strong></div>
+            <div><span>Input size</span><strong>224 × 224</strong></div>
+          </div>
+          <button id="analyzeAnotherBtn" class="secondary-btn" type="button">Analyze another image</button>
+        </section>
 
-      <div id="error" class="error" hidden role="alert">
-        <strong id="errorHeading">Inference failed</strong>
-        <p id="errorMessage"></p>
-        <small id="errorSuggestion"></small>
+        <div id="error" class="error" hidden role="alert">
+          <strong id="errorHeading">Inference failed</strong>
+          <p id="errorMessage"></p>
+          <small id="errorSuggestion"></small>
+        </div>
       </div>
-    </section>
+    </main>
 
     <section class="method">
       <div><span class="section-label">How it works</span><h2>From pixels to a weather label.</h2></div>
